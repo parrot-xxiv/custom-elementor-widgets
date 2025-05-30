@@ -22,6 +22,8 @@ define( 'CEW_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 // Autoload core classes
 require_once CEW_PLUGIN_PATH . 'includes/class-cew-plugin.php';
 require_once CEW_PLUGIN_PATH . 'includes/shortcode-sticky.php';
+require_once CEW_PLUGIN_PATH . 'includes/shortcode-theme-toggle.php';
+require_once CEW_PLUGIN_PATH . 'includes/shortcode-number-reel.php';
 
 // Run the plugin
 add_action( 'plugins_loaded', [ 'Custom\Plugin', 'init' ] );
