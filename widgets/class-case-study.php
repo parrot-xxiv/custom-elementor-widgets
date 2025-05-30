@@ -134,11 +134,12 @@ class Case_Study_Widget extends \Elementor\Widget_Base
             [
                 'label' => __('Category', 'custom-elementor-widgets'),
                 'type' => \Elementor\Controls_Manager::SELECT,
-                'default' => 'web',
+                'default' => 'digital',
                 'options' => [
-                    'web' => __('Web Development', 'custom-elementor-widgets'),
-                    'mobile' => __('Mobile Apps', 'custom-elementor-widgets'),
-                    'design' => __('UI/UX Design', 'custom-elementor-widgets'),
+                    'digital' => __('Digital', 'custom-elementor-widgets'),
+                    'branding' => __('Branding', 'custom-elementor-widgets'),
+                    'design' => __('Design', 'custom-elementor-widgets'),
+                    'web' => __('Web', 'custom-elementor-widgets'),
                 ],
             ]
         );
@@ -166,12 +167,12 @@ class Case_Study_Widget extends \Elementor\Widget_Base
                     [
                         'project_title' => __('E-commerce Platform', 'custom-elementor-widgets'),
                         'project_description' => __('A fully responsive e-commerce website with product filtering, cart functionality, and secure checkout.', 'custom-elementor-widgets'),
-                        'project_category' => 'web',
+                        'project_category' => 'digital',
                     ],
                     [
                         'project_title' => __('Fitness Tracker', 'custom-elementor-widgets'),
                         'project_description' => __('A mobile application that helps users track workouts, set goals, and monitor their fitness progress.', 'custom-elementor-widgets'),
-                        'project_category' => 'mobile',
+                        'project_category' => 'branding',
                     ],
                     [
                         'project_title' => __('Analytics Dashboard', 'custom-elementor-widgets'),
@@ -229,107 +230,194 @@ class Case_Study_Widget extends \Elementor\Widget_Base
         }
 
         $category_labels = [
-            'web' => __('Web Development', 'custom-elementor-widgets'),
-            'mobile' => __('Mobile Apps', 'custom-elementor-widgets'),
-            'design' => __('UI/UX Design', 'custom-elementor-widgets'),
+            'digital' => __('Digital', 'custom-elementor-widgets'),
+            'branding' => __('Branding', 'custom-elementor-widgets'),
+            'design' => __('Design', 'custom-elementor-widgets'),
+            'web' => __('Web', 'custom-elementor-widgets'),
         ];
 
         $columns_class = 'lg:grid-cols-' . $settings['columns'];
 ?>
 
         <style>
-            .active {
-                text-decoration: underline;
+            .filter-btn.active {
+                color: black;
+                position: relative;
+            }
+
+            .filter-btn.active::after {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                height: 2px;
+                width: 100%;
+                background-color: black;
+                transition: width 0.3s ease-in-out;
             }
         </style>
+
         <div class="portfolio-widget-<?php echo $widget_id; ?>">
 
-            <?php if ($settings['show_filters'] === 'yes' && !empty($categories)) : ?>
-                <!-- Filter Buttons -->
-                <div class="container mx-auto px-4">
-                    <div class="flex flex-wrap justify-center gap-3 mb-8" id="filter-buttons-<?php echo $widget_id; ?>">
+            <div class="flex items-center justify-between">
+
+                <h2 class="text-4xl font-bold text-secondary dark:text-white text-center relative"
+                    style="font-family: 'Space Grotesk', 'Sans Serif';">
+                    <?php echo esc_html($settings['section_title']); ?>
+                </h2>
+
+                <?php if ($settings['show_filters'] === 'yes' && !empty($categories)) : ?>
+                    <!-- Filter Buttons -->
+                    <div class="flex flex-wrap justify-center items-center gap-5 text-gray-500" id="filter-buttons-<?php echo $widget_id; ?>">
                         <button
-                            class="filter-btn active cursot-pointer"
+                            class="filter-btn active cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105 relative after:block after:content-[''] after:absolute after:left-0 after:bottom-0 after:h-[2px] after:w-0 after:bg-black hover:after:w-full after:transition-all after:duration-300"
                             data-filter="all">
-                            <?php echo __('All Projects', 'custom-elementor-widgets'); ?>
+                            <?php echo __('All', 'custom-elementor-widgets'); ?>
                         </button>
                         <?php foreach ($categories as $category) : ?>
                             <button
-                                class="filter-btn cursor-pointer"
+                                class="filter-btn  cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105 relative after:block after:content-[''] after:absolute after:left-0 after:bottom-0 after:h-[2px] after:w-0 after:bg-black hover:after:w-full after:transition-all after:duration-300"
                                 data-filter="<?php echo esc_attr($category); ?>">
                                 <?php echo esc_html($category_labels[$category]); ?>
                             </button>
                         <?php endforeach; ?>
                     </div>
-                </div>
-            <?php endif; ?>
+                <?php endif; ?>
+
+
+            </div>
 
             <!-- Projects Grid -->
             <section id="projects-<?php echo $widget_id; ?>" class="py-16">
                 <div class="container mx-auto px-4">
-                    <h2 class="text-3xl font-bold text-secondary dark:text-white text-center mb-16 relative">
-                        <span class="relative z-10"><?php echo esc_html($settings['section_title']); ?></span>
-                        <span class="absolute -bottom-3 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-primary rounded-full"></span>
-                    </h2>
-
                     <div class="projects-grid grid grid-cols-1 md:grid-cols-2 <?php echo esc_attr($columns_class); ?> gap-8">
                         <?php foreach ($settings['projects_list'] as $index => $project) : ?>
-                            <div
+                            <a
+                                href="<?php echo esc_url($project['project_link']['url']); ?>"
+                                <?php echo $project['project_link']['is_external'] ? 'target="_blank"' : ''; ?>
+                                <?php echo $project['project_link']['nofollow'] ? 'rel="nofollow"' : ''; ?>
                                 data-category="<?php echo esc_attr($project['project_category']); ?>"
-                                class="project-card relative h-72 rounded-lg overflow-hidden group shadow-lg bg-center bg-cover bg-no-repeat"
+                                class="project-card tilt-20 relative h-[450px] overflow-hidden group shadow-lg bg-center bg-cover bg-no-repeat block"
                                 style="background-image: url('<?php echo esc_url($project['project_image']['url'] ? $project['project_image']['url'] : 'https://placehold.co/600x400'); ?>');">
-                                <div
-                                    class="absolute inset-0 transition-opacity duration-300 group-hover:bg-black/40"></div>
 
-                                <div
-                                    class="absolute inset-0 flex flex-col items-center justify-center text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100 z-10">
-                                    <h3
-                                        class="text-2xl -translate-y-5 font-bold group-hover:translate-y-0 transition">
-                                        <?php echo esc_attr($project['project_title']); ?>
+                                <!-- Hover overlay -->
+                                <div class="absolute inset-0 transition-opacity duration-300 group-hover:bg-black/40"></div>
+
+                                <!-- Content (title and category) -->
+                                <div class="absolute inset-0 flex flex-col items-center justify-center text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100 z-10">
+                                    <h3 class="text-2xl -translate-y-5 font-bold group-hover:translate-y-0 transition">
+                                        <?php echo esc_html($project['project_title']); ?>
                                     </h3>
-                                    <p
-                                        class="text-sm mt-2 px-4 text-center translate-y-5 group-hover:translate-y-0 transition">
+                                    <p class="text-sm mt-2 px-4 text-center translate-y-5 group-hover:translate-y-0 transition">
                                         <?php echo esc_html($category_labels[$project['project_category']]); ?>
                                     </p>
-                                    <?php if (!empty($project['project_link']['url'])) : ?>
-                                        <a href="<?php echo esc_url($project['project_link']['url']); ?>"
-                                            <?php echo $project['project_link']['is_external'] ? 'target="_blank"' : ''; ?>
-                                            <?php echo $project['project_link']['nofollow'] ? 'rel="nofollow"' : ''; ?>
-                                            class="inline-block bg-secondary text-white px-4 py-2 rounded-lg hover:bg-opacity-90 transition-colors">
-                                            <?php echo __('View Project', 'custom-elementor-widgets'); ?>
-                                        </a>
-                                    <?php endif; ?>
                                 </div>
-                            </div>
+
+                                <!-- Hover Icon (top-right) -->
+                                <div class="absolute top-3 right-3 z-20 text-white opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+                                    <i data-lucide="arrow-up-right"></i>
+                                </div>
+                            </a>
                         <?php endforeach; ?>
                     </div>
                 </div>
             </section>
         </div>
 
+        <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/Flip.min.js"></script>
         <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const filterButtons = document.querySelectorAll('#filter-buttons-<?php echo $widget_id; ?> .filter-btn');
-                const projectCards = document.querySelectorAll('#projects-<?php echo $widget_id; ?> .project-card');
+            jQuery(document).ready(function($) {
+                // const filterButtons = document.querySelectorAll('#filter-buttons-<?php echo $widget_id; ?> .filter-btn');
+                // const projectCards = document.querySelectorAll('#projects-<?php echo $widget_id; ?> .project-card');
 
-                filterButtons.forEach(button => {
-                    button.addEventListener('click', function() {
-                        const filter = this.getAttribute('data-filter');
+                // filterButtons.forEach(button => {
+                //     button.addEventListener('click', function() {
+                //         const filter = this.getAttribute('data-filter');
 
-                        // Update active button
-                        filterButtons.forEach(btn => btn.classList.remove('active'));
-                        this.classList.add('active');
+                //         // Update active button
+                //         filterButtons.forEach(btn => btn.classList.remove('active'));
+                //         this.classList.add('active');
 
-                        // Filter projects
-                        projectCards.forEach(card => {
-                            if (filter === 'all' || card.getAttribute('data-category') === filter) {
-                                card.classList.remove('hidden');
+                //         // Filter projects
+                //         projectCards.forEach(card => {
+                //             if (filter === 'all' || card.getAttribute('data-category') === filter) {
+                //                 card.classList.remove('hidden');
+                //             } else {
+                //                 card.classList.add('hidden');
+                //             }
+                //         });
+                //     });
+                // });
+                $('.filter-btn').click(function() {
+                    // Update active button styling
+                    $('.filter-btn').removeClass('active');
+                    $(this).addClass('active');
+                    const filter = $(this).data('filter');
+                    const projectCards = $('.project-card');
+                    const projectsGrid = $('.projects-grid');
+
+                    // Get the current state before changes
+                    const state = Flip.getState([projectCards, projectsGrid]);
+
+                    // Show/hide elements based on filter
+                    if (filter === 'all') {
+                        projectCards.show();
+                    } else {
+                        projectCards.each(function() {
+                            if ($(this).data('category') === filter) {
+                                $(this).show();
                             } else {
-                                card.classList.add('hidden');
+                                $(this).hide();
                             }
                         });
+                    }
+
+                    // Animate from the previous state to the new state
+                    Flip.from(state, {
+                        duration: 0.5,
+                        ease: "power1.inOut",
+                        absolute: true,
+                        // Add this to properly handle container height animation
+                        absoluteOnLeave: true,
+                        onEnter: elements => {
+                            // Only animate new elements, not the container
+                            const cards = elements.filter(el => el.classList.contains('project-card'));
+                            if (cards.length === 0) return null;
+
+                            return gsap.fromTo(cards, {
+                                opacity: 0,
+                                scale: 0.8,
+                                y: 30
+                            }, {
+                                opacity: 1,
+                                scale: 1,
+                                y: 0,
+                                duration: 0.8,
+                                ease: "back.out(1.2)"
+                            });
+                        },
+                        onLeave: elements => {
+                            // Only animate removed elements, not the container
+                            const cards = elements.filter(el => el.classList.contains('project-card'));
+                            if (cards.length === 0) return null;
+
+                            return gsap.to(cards, {
+                                opacity: 0,
+                                scale: 0.8,
+                                y: -30,
+                                duration: 0.5
+                            });
+                        }
                     });
-                });
+
+                    // Add a nice button animation
+                    gsap.from(this, {
+                        scale: 0.95,
+                        duration: 0.3,
+                        ease: "back.out(1.5)"
+                    });
+                })
             });
         </script>
 <?php
