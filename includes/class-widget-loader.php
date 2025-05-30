@@ -14,7 +14,10 @@ class Widget_Loader {
             'class-image-transition.php',
             'class-sticky-card.php',
             'class-parallax.php',
-            'class-case-study.php'
+            'class-case-study.php',
+            'class-rolling-numbers.php',
+            'class-crawler.php',
+            'class-html-tag.php'
             // .. add other widgets
         ];
 
@@ -28,6 +31,9 @@ class Widget_Loader {
         $manager->register( new \Sticky_Card_Widget() );
         $manager->register( new \Parallax_Widget() );
         $manager->register( new \Case_Study_Widget() );
+        $manager->register( new \Rolling_Number_Widget() );
+        $manager->register( new \Crawler_Widget() );
+        $manager->register( new \HTML_Tag_Widget() );
 
         // .. add other widgets
     }
