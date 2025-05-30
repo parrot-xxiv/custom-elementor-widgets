@@ -21,7 +21,7 @@ class Plugin {
 
     private function setup_hooks() {
         // Mime_Types::register();
-        // Script_Loader::register();
+        Script_Loader::register();
         // Ajax_Handler::register();
 
         Widget_Loader::register();
