@@ -63,7 +63,15 @@ class Script_Loader
     {
         echo '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />';
         echo '<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>';
-        echo '<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>';
-        echo '<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>';
+        // echo '<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>';
+        // echo '<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/Flip.min.js"></script>';
+        echo '<script src="https://unpkg.com/lucide@latest"></script>';
+        echo '<script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    if (window.lucide) {
+                    lucide.createIcons();
+                    }
+                });
+            </script>';
     }
 }
