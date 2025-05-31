@@ -4,7 +4,7 @@
   "author": "Eldren Par",
   "scripts": {
     "tw:watch": "npx @tailwindcss/cli -i ./widgets/css/index.css -o ./widgets/css/style.css --watch",
-    "tw:build": "npx @tailwindcss/cli -i ./widgets/css/index.css -o ./widgets/css/style.css --build"
+    "tw:build": "npx @tailwindcss/cli -i ./widgets/css/index.css -o ./widgets/css/style.css --minify"
   },
   "dependencies": {
     "tailwindcss": "^4.1.4"

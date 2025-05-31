@@ -11,6 +11,7 @@ class Script_Loader
         // add_action('elementor/editor/after_enqueue_scripts', [__CLASS__, 'register_scripts']);
         // add_action('elementor/editor/after_enqueue_scripts', [__CLASS__, 'enqueue_editor_scripts']);
         // add_filter('script_loader_tag', [__CLASS__, 'modify_script_tag'], 10, 3);
+        add_action('wp_enqueue_scripts', [__CLASS__, 'enqueue_plugin_assets']);
         add_action('wp_head', [__CLASS__, 'enqueue_dev_libraries']);
     }
 
@@ -33,12 +34,23 @@ class Script_Loader
         // );
 
         // wp_register_style(
-        //     'feebas-tailwind-css',
-        //     FEW_PLUGIN_URL . 'widgets/css/style.css',
+        //     'custom-elementor-widget',
+        //     CEW_PLUGIN_URL . 'widgets/css/style.css',
         //     [],
         //     null
         // );
 
+    }
+
+    public static function enqueue_plugin_assets()
+    {
+
+        wp_enqueue_style(
+            'custom-elementor-widget',
+            CEW_PLUGIN_URL . 'widgets/css/style.css',
+            [],
+            null
+        );
     }
 
     public static function enqueue_editor_scripts()
