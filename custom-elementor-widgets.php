@@ -24,6 +24,7 @@ require_once CEW_PLUGIN_PATH . 'includes/class-cew-plugin.php';
 require_once CEW_PLUGIN_PATH . 'includes/shortcode-sticky.php';
 require_once CEW_PLUGIN_PATH . 'includes/shortcode-theme-toggle.php';
 require_once CEW_PLUGIN_PATH . 'includes/shortcode-number-reel.php';
+require_once CEW_PLUGIN_PATH . 'includes/shortcode-footer.php';
 
 // Run the plugin
 add_action( 'plugins_loaded', [ 'Custom\Plugin', 'init' ] );
