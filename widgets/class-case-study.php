@@ -259,9 +259,9 @@ class Case_Study_Widget extends \Elementor\Widget_Base
 
         <div class="portfolio-widget-<?php echo $widget_id; ?>">
 
-            <div class="flex items-center justify-between">
+            <div class="flex flex-col md:flex-row items-center justify-between">
 
-                <h2 class="text-4xl font-bold text-secondary dark:text-white text-center relative"
+                <h2 class="text-4xl font-bold text-secondary text-black text-center relative mb-5 md:mb-0"
                     style="font-family: 'Space Grotesk', 'Sans Serif';">
                     <?php echo esc_html($settings['section_title']); ?>
                 </h2>
@@ -290,14 +290,15 @@ class Case_Study_Widget extends \Elementor\Widget_Base
             <!-- Projects Grid -->
             <section id="projects-<?php echo $widget_id; ?>" class="py-16">
                 <div class="container mx-auto px-4">
-                    <div class="projects-grid grid grid-cols-1 md:grid-cols-2 <?php echo esc_attr($columns_class); ?> gap-8">
+                    <!-- md:grid-cols-3 -->
+                    <div class="projects-grid grid grid-cols-2 md:grid-cols-3 <?php echo esc_attr($columns_class); ?> gap-8">
                         <?php foreach ($settings['projects_list'] as $index => $project) : ?>
                             <a
                                 href="<?php echo esc_url($project['project_link']['url']); ?>"
                                 <?php echo $project['project_link']['is_external'] ? 'target="_blank"' : ''; ?>
                                 <?php echo $project['project_link']['nofollow'] ? 'rel="nofollow"' : ''; ?>
                                 data-category="<?php echo esc_attr($project['project_category']); ?>"
-                                class="project-card tilt-20 relative h-[450px] overflow-hidden group shadow-lg bg-center bg-cover bg-no-repeat block"
+                                class="project-card tilt-20 relative h-[200px] md:h-[450px] overflow-hidden group shadow-lg bg-center bg-cover bg-no-repeat block"
                                 style="background-image: url('<?php echo esc_url($project['project_image']['url'] ? $project['project_image']['url'] : 'https://placehold.co/600x400'); ?>');">
 
                                 <!-- Hover overlay -->
