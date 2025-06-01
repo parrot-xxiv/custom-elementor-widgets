@@ -54,7 +54,7 @@ class Parallax_Widget extends \Elementor\Widget_Base
             ]
         );
 
-        $this->add_control(
+        $this->add_responsive_control(
             'parallax_speed',
             [
                 'label' => __('Parallax Speed', 'custom-elementor-widgets'),
@@ -67,10 +67,12 @@ class Parallax_Widget extends \Elementor\Widget_Base
                     ],
                 ],
                 'default' => [
+                    'unit' => 'px',
                     'size' => 0.5,
                 ],
             ]
         );
+
 
         $this->end_controls_section();
 
@@ -162,20 +164,24 @@ class Parallax_Widget extends \Elementor\Widget_Base
     {
         $settings = $this->get_settings_for_display();
         $image_url = $settings['background_image']['url'];
-        $parallax_speed = $settings['parallax_speed']['size'];
         $widget_id = $this->get_id();
 
         if (empty($image_url)) {
             return;
         }
+
+        $speed_desktop = isset($settings['parallax_speed']['size']) ? $settings['parallax_speed']['size'] : 0.5;
+        $speed_tablet = isset($settings['parallax_speed_tablet']['size']) ? $settings['parallax_speed_tablet']['size'] : $speed_desktop;
+        $speed_mobile = isset($settings['parallax_speed_mobile']['size']) ? $settings['parallax_speed_mobile']['size'] : $speed_tablet;
 ?>
-        <section class="parallax-banner parallax-banner-<?php echo $widget_id; ?>">
+        <section class="parallax-banner parallax-banner-<?php echo esc_attr($widget_id); ?>">
             <div class="parallax-image"
                 style="background-image: url('<?php echo esc_url($image_url); ?>');"
-                data-speed="<?php echo esc_attr($parallax_speed); ?>">
+                data-speed-desktop="<?php echo esc_attr($speed_desktop); ?>"
+                data-speed-tablet="<?php echo esc_attr($speed_tablet); ?>"
+                data-speed-mobile="<?php echo esc_attr($speed_mobile); ?>">
             </div>
         </section>
-
 
         <script>
             document.addEventListener('DOMContentLoaded', function() {
@@ -183,12 +189,23 @@ class Parallax_Widget extends \Elementor\Widget_Base
                 if (!section) return;
 
                 const image = section.querySelector('.parallax-image');
-                const speed = parseFloat(image.dataset.speed || 0.3);
+
+                function getResponsiveSpeed() {
+                    const w = window.innerWidth;
+                    if (w <= 767) {
+                        return parseFloat(image.dataset.speedMobile || 0.3);
+                    } else if (w <= 1024) {
+                        return parseFloat(image.dataset.speedTablet || 0.4);
+                    } else {
+                        return parseFloat(image.dataset.speedDesktop || 0.5);
+                    }
+                }
 
                 function updateParallax() {
                     const rect = section.getBoundingClientRect();
                     const scrollY = window.pageYOffset || document.documentElement.scrollTop;
                     const offsetTop = rect.top + scrollY;
+                    const speed = getResponsiveSpeed();
 
                     if (scrollY + window.innerHeight > offsetTop && scrollY < offsetTop + section.offsetHeight) {
                         const distance = scrollY - offsetTop;
@@ -204,28 +221,34 @@ class Parallax_Widget extends \Elementor\Widget_Base
             });
         </script>
 
-            <style>
-        .parallax-banner {
-            position: relative;
-            height: 500px;
-            width: 100%;
-            overflow: hidden;
-        }
+        <style>
+            .parallax-banner {
+                position: relative;
+                width: 100%;
+                overflow: hidden;
+            }
 
-        .parallax-image {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 150%;
-            background-size: cover;
-            background-position: center;
-            transform: translateY(0);
-            z-index: -1;
-            will-change: transform;
-        }
-    </style>
-    <?php
+            .parallax-banner::before {
+                content: "";
+                position: absolute;
+                inset: 0;
+                z-index: 1;
+                pointer-events: none;
+            }
+
+            .parallax-banner .parallax-image {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 150%;
+                background-size: cover;
+                background-position: center;
+                transform: translateY(0);
+                z-index: -1;
+                will-change: transform;
+            }
+        </style>
+<?php
     }
-
 }
