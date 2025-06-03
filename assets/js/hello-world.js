@@ -1,0 +1,1 @@
+console.log('hello world widget is being used in this page')

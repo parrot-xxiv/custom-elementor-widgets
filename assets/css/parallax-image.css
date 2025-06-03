@@ -1,0 +1,75 @@
+/**
+ * Optimized Parallax Widget Styles
+ */
+
+.parallax-banner {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    /* Hardware acceleration */
+    transform: translateZ(0);
+    /* Prevent flickering */
+    backface-visibility: hidden;
+    perspective: 1000px;
+}
+
+.parallax-banner::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.parallax-banner .parallax-image {
+    position: absolute;
+    top: -50%;
+    left: 0;
+    right: 0;
+    height: 200%;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    /* Hardware acceleration for smooth transforms */
+    transform: translate3d(0, 0, 0);
+    will-change: transform;
+    z-index: 0;
+    /* Prevent subpixel rendering issues */
+    backface-visibility: hidden;
+}
+
+/* Responsive optimizations */
+@media (max-width: 767px) {
+    .parallax-banner[data-disable-mobile="true"] .parallax-image {
+        /* Reset transform on mobile when disabled */
+        transform: translate3d(0, 0, 0) !important;
+        /* Reduce height for better mobile performance */
+        height: 100%;
+        top: 0;
+    }
+    
+    /* For active mobile parallax, ensure enough coverage */
+    .parallax-banner[data-disable-mobile="false"] .parallax-image {
+        height: 250%;
+        top: -75%;
+    }
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+    .parallax-banner .parallax-image {
+        transform: translate3d(0, 0, 0) !important;
+        height: 100%;
+        top: 0;
+    }
+}
+
+/* Print styles */
+@media print {
+    .parallax-banner .parallax-image {
+        transform: translate3d(0, 0, 0) !important;
+        height: 100%;
+        top: 0;
+        position: static;
+    }
+}

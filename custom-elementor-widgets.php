@@ -1,30 +1,23 @@
 <?php
 /**
  * Plugin Name:     Custom Elementor Widgets
- * Plugin URI:      PLUGIN SITE HERE
- * Description:     PLUGIN DESCRIPTION HERE
- * Author:          YOUR NAME HERE
- * Author URI:      YOUR SITE HERE
+ * Plugin URI:      https://github.com/parrot-xxiv/custom-elementor-widgets
+ * Description:     Custom Elementor Widgets
+ * Author:          Eldren Par
  * Text Domain:     custom-elementor-widgets
  * Domain Path:     /languages
  * Version:         0.1.0
  *
  * @package         Custom_Elementor_Widgets
  */
-// Exit if accessed directly.
-if ( ! defined( 'ABSPATH' ) ) {
-    exit; // Exit if accessed directly.
-}
 
-define( 'CEW_PLUGIN_PATH', plugin_dir_path( __FILE__ ) );
-define( 'CEW_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
+defined('ABSPATH') || exit;
 
-// Autoload core classes
-require_once CEW_PLUGIN_PATH . 'includes/class-cew-plugin.php';
-require_once CEW_PLUGIN_PATH . 'includes/shortcode-sticky.php';
-require_once CEW_PLUGIN_PATH . 'includes/shortcode-theme-toggle.php';
-require_once CEW_PLUGIN_PATH . 'includes/shortcode-number-reel.php';
-require_once CEW_PLUGIN_PATH . 'includes/shortcode-footer.php';
+define('CEW_PLUGIN_PATH', plugin_dir_path(__FILE__));
+define('CEW_PLUGIN_URL', plugin_dir_url(__FILE__));
 
-// Run the plugin
-add_action( 'plugins_loaded', [ 'Custom\Plugin', 'init' ] );
+require_once CEW_PLUGIN_PATH . 'includes/plugin.php';
+require_once CEW_PLUGIN_PATH . 'includes/admin.php';
+
+CustomElementorWidgets\Plugin::get_instance();
+CustomElementorWidgets\Admin::get_instance();

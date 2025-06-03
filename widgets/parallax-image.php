@@ -9,7 +9,7 @@ if (! defined('ABSPATH')) {
     exit; // Exit if accessed directly.
 }
 
-class Parallax_Widget extends \Elementor\Widget_Base
+class Parallax_Image extends \Elementor\Widget_Base
 {
 
     public function get_name()
@@ -19,7 +19,7 @@ class Parallax_Widget extends \Elementor\Widget_Base
 
     public function get_title()
     {
-        return __('Parallax Banner', 'custom-elementor-widgets');
+        return __('Parallax Image', 'custom-elementor-widgets');
     }
 
     public function get_icon()
@@ -30,6 +30,16 @@ class Parallax_Widget extends \Elementor\Widget_Base
     public function get_categories()
     {
         return ['basic'];
+    }
+
+    public function get_script_depends()
+    {
+        return ['cew-gsap','cew-scrolltrigger','cew-parallax-image'];
+    }
+
+    public function get_style_depends()
+    {
+        return ['cew-parallax-image'];
     }
 
     protected function register_controls()
@@ -61,21 +71,37 @@ class Parallax_Widget extends \Elementor\Widget_Base
                 'type' => \Elementor\Controls_Manager::SLIDER,
                 'range' => [
                     'px' => [
-                        'min' => 0.1,
+                        'min' => 0,
                         'max' => 1,
                         'step' => 0.1,
                     ],
                 ],
                 'default' => [
-                    'unit' => 'px',
                     'size' => 0.5,
+                ],
+                'tablet_default' => [
+                    'size' => 0.3,
+                ],
+                'mobile_default' => [
+                    'size' => 0.2,
                 ],
             ]
         );
 
+        $this->add_control(
+            'disable_mobile',
+            [
+                'label' => __('Disable on Mobile', 'custom-elementor-widgets'),
+                'type' => \Elementor\Controls_Manager::SWITCHER,
+                'label_on' => __('Yes', 'custom-elementor-widgets'),
+                'label_off' => __('No', 'custom-elementor-widgets'),
+                'return_value' => 'yes',
+                'default' => 'yes',
+                'description' => __('Disable parallax effect on mobile devices for better performance', 'custom-elementor-widgets'),
+            ]
+        );
 
         $this->end_controls_section();
-
 
         // Dimensions Section
         $this->start_controls_section(
@@ -110,6 +136,14 @@ class Parallax_Widget extends \Elementor\Widget_Base
                     'unit' => 'vh',
                     'size' => 60,
                 ],
+                'tablet_default' => [
+                    'unit' => 'vh',
+                    'size' => 50,
+                ],
+                'mobile_default' => [
+                    'unit' => 'vh',
+                    'size' => 40,
+                ],
                 'selectors' => [
                     '{{WRAPPER}} .parallax-banner' => 'height: {{SIZE}}{{UNIT}};',
                 ],
@@ -127,6 +161,18 @@ class Parallax_Widget extends \Elementor\Widget_Base
             ]
         );
 
+        $this->add_control(
+            'fallback_background',
+            [
+                'label' => __('Fallback Background Color', 'custom-elementor-widgets'),
+                'type' => \Elementor\Controls_Manager::COLOR,
+                'default' => '#f0f0f0',
+                'description' => __('Background color shown if parallax image doesn\'t cover the entire area', 'custom-elementor-widgets'),
+                'selectors' => [
+                    '{{WRAPPER}} .parallax-banner' => 'background-color: {{VALUE}};',
+                ],
+            ]
+        );
 
         $this->add_control(
             'overlay_color',
@@ -157,6 +203,26 @@ class Parallax_Widget extends \Elementor\Widget_Base
             ]
         );
 
+        $this->add_group_control(
+            \Elementor\Group_Control_Border::get_type(),
+            [
+                'name' => 'border',
+                'selector' => '{{WRAPPER}} .parallax-banner',
+            ]
+        );
+
+        $this->add_responsive_control(
+            'border_radius',
+            [
+                'label' => __('Border Radius', 'custom-elementor-widgets'),
+                'type' => \Elementor\Controls_Manager::DIMENSIONS,
+                'size_units' => ['px', '%'],
+                'selectors' => [
+                    '{{WRAPPER}} .parallax-banner' => 'border-radius: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+                ],
+            ]
+        );
+
         $this->end_controls_section();
     }
 
@@ -170,85 +236,38 @@ class Parallax_Widget extends \Elementor\Widget_Base
             return;
         }
 
-        $speed_desktop = isset($settings['parallax_speed']['size']) ? $settings['parallax_speed']['size'] : 0.5;
-        $speed_tablet = isset($settings['parallax_speed_tablet']['size']) ? $settings['parallax_speed_tablet']['size'] : $speed_desktop;
-        $speed_mobile = isset($settings['parallax_speed_mobile']['size']) ? $settings['parallax_speed_mobile']['size'] : $speed_tablet;
+        // Get responsive parallax speeds properly
+        $speed_desktop = $this->get_responsive_control_value($settings, 'parallax_speed', 'desktop') ?? 0.5;
+        $speed_tablet = $this->get_responsive_control_value($settings, 'parallax_speed', 'tablet') ?? $speed_desktop;
+        $speed_mobile = $this->get_responsive_control_value($settings, 'parallax_speed', 'mobile') ?? $speed_tablet;
+
+        $disable_mobile = $settings['disable_mobile'] === 'yes';
 ?>
-        <section class="parallax-banner parallax-banner-<?php echo esc_attr($widget_id); ?>">
+        <section class="parallax-banner" 
+                 data-widget-id="<?php echo esc_attr($widget_id); ?>"
+                 data-speed-desktop="<?php echo esc_attr($speed_desktop); ?>"
+                 data-speed-tablet="<?php echo esc_attr($speed_tablet); ?>"
+                 data-speed-mobile="<?php echo esc_attr($speed_mobile); ?>"
+                 data-disable-mobile="<?php echo esc_attr($disable_mobile ? 'true' : 'false'); ?>">
             <div class="parallax-image"
-                style="background-image: url('<?php echo esc_url($image_url); ?>');"
-                data-speed-desktop="<?php echo esc_attr($speed_desktop); ?>"
-                data-speed-tablet="<?php echo esc_attr($speed_tablet); ?>"
-                data-speed-mobile="<?php echo esc_attr($speed_mobile); ?>">
+                 style="background-image: url('<?php echo esc_url($image_url); ?>');"
+                 role="img"
+                 aria-label="<?php echo esc_attr($settings['background_image']['alt'] ?? 'Parallax background image'); ?>">
             </div>
         </section>
-
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const section = document.querySelector('.parallax-banner-<?php echo esc_js($widget_id); ?>');
-                if (!section) return;
-
-                const image = section.querySelector('.parallax-image');
-
-                function getResponsiveSpeed() {
-                    const w = window.innerWidth;
-                    if (w <= 767) {
-                        return parseFloat(image.dataset.speedMobile || 0.3);
-                    } else if (w <= 1024) {
-                        return parseFloat(image.dataset.speedTablet || 0.4);
-                    } else {
-                        return parseFloat(image.dataset.speedDesktop || 0.5);
-                    }
-                }
-
-                function updateParallax() {
-                    const rect = section.getBoundingClientRect();
-                    const scrollY = window.pageYOffset || document.documentElement.scrollTop;
-                    const offsetTop = rect.top + scrollY;
-                    const speed = getResponsiveSpeed();
-
-                    if (scrollY + window.innerHeight > offsetTop && scrollY < offsetTop + section.offsetHeight) {
-                        const distance = scrollY - offsetTop;
-                        image.style.transform = `translateY(${distance * speed}px)`;
-                    }
-                }
-
-                window.addEventListener('scroll', updateParallax, {
-                    passive: true
-                });
-                window.addEventListener('resize', updateParallax);
-                updateParallax();
-            });
-        </script>
-
-        <style>
-            .parallax-banner {
-                position: relative;
-                width: 100%;
-                overflow: hidden;
-            }
-
-            .parallax-banner::before {
-                content: "";
-                position: absolute;
-                inset: 0;
-                z-index: 1;
-                pointer-events: none;
-            }
-
-            .parallax-banner .parallax-image {
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                height: 150%;
-                background-size: cover;
-                background-position: center;
-                transform: translateY(0);
-                z-index: -1;
-                will-change: transform;
-            }
-        </style>
 <?php
+    }
+
+    /**
+     * Get responsive control value helper
+     */
+    private function get_responsive_control_value($settings, $control_name, $device = 'desktop')
+    {
+        if ($device === 'desktop') {
+            return $settings[$control_name]['size'] ?? null;
+        }
+        
+        $device_key = $control_name . '_' . $device;
+        return $settings[$device_key]['size'] ?? null;
     }
 }

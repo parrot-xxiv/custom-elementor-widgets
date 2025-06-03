@@ -1,0 +1,91 @@
+/* Base animation styles */
+.html-tag-element.has-entrance-animation {
+    position: relative;
+    /* Good for potential absolute positioning inside if needed */
+}
+
+/* Initial invisible state for animations that need it */
+.html-tag-element.animation-staggered_blur_fade,
+.html-tag-element.animation-typewriter {
+    opacity: 0;
+    /* Start hidden, JS will make it visible via .initialized */
+}
+
+/* Staggered Blur & Fade-In Letters */
+.html-tag-element.animation-staggered_blur_fade.initialized {
+    opacity: 1;
+}
+
+.html-tag-element.animation-staggered_blur_fade .html-tag-word {
+    display: inline-block;
+    /* Crucial for word-level wrapping */
+    /* white-space: nowrap; */
+    /* Uncomment if letters within a single word should never break to a new line */
+}
+
+.html-tag-element.animation-staggered_blur_fade .html-tag-letter {
+    display: inline-block;
+    opacity: 0;
+    filter: blur(10px);
+    transform: translateY(20px);
+    transition: opacity 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+        filter 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+        transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    /* transition-delay is set by JavaScript for each letter */
+}
+
+.html-tag-element.animation-staggered_blur_fade .html-tag-letter.animate {
+    opacity: 1;
+    filter: blur(0px);
+    transform: translateY(0);
+}
+
+/* Typewriter Effect */
+.html-tag-element.animation-typewriter {
+    /* opacity: 0; already set above */
+    overflow: hidden;
+    /* Keeps content within bounds as it types */
+    white-space: nowrap;
+    /* Prevents text from wrapping to the next line during typing */
+    display: block;
+    /* Or 'inline-block'. 'block' makes it behave like a heading/paragraph for layout */
+}
+
+.html-tag-element.animation-typewriter.initialized {
+    opacity: 1;
+    /* Becomes visible once JS initializes it */
+}
+
+.html-tag-element.animation-typewriter .html-tag-typewriter-text {
+    display: inline-block;
+    /* To sit nicely next to the cursor */
+    vertical-align: baseline;
+}
+
+.html-tag-element.animation-typewriter .html-tag-cursor {
+    display: inline-block;
+    background-color: currentColor;
+    /* Uses the text color for the cursor */
+    width: 2px;
+    /* Adjust cursor thickness */
+    margin-left: 2px;
+    /* Space between last char and cursor */
+    animation: html-tag-blink 1s infinite;
+    vertical-align: baseline;
+    /* Align cursor with the text */
+    /* height: 1em; */
+    /* Optional: if you want cursor height to match text general height */
+}
+
+@keyframes html-tag-blink {
+
+    0%,
+    50% {
+        opacity: 1;
+    }
+
+    51%,
+    100% {
+        opacity: 0;
+    }
+}

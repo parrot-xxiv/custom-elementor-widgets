@@ -2,14 +2,11 @@
 
 /**
  * Image Transition Loop Widget for Custom Elementor Widgets plugin.
- *
- * @package Custom_Elementor_Widgets
  */
-if (! defined('ABSPATH')) {
-    exit; // Exit if accessed directly.
-}
 
-class Image_Transition_Loop_Widget extends \Elementor\Widget_Base
+defined('ABSPATH') || exit;
+
+class Image_Transition_Loop extends \Elementor\Widget_Base
 {
 
     public function get_name()
@@ -34,12 +31,12 @@ class Image_Transition_Loop_Widget extends \Elementor\Widget_Base
 
     public function get_script_depends()
     {
-        return ['swiper'];
+        return ['cew-swiper', 'cew-image-transition-loop'];
     }
 
     public function get_style_depends()
     {
-        return ['swiper'];
+        return ['cew-swiper'];
     }
 
     protected function register_controls()
@@ -172,17 +169,19 @@ class Image_Transition_Loop_Widget extends \Elementor\Widget_Base
 
     protected function render()
     {
+        $widget_id = $this->get_id(); // Get the unique widget ID
         $settings = $this->get_settings_for_display();
         $images = $settings['images'];
 
         if (empty($images)) {
             return;
         }
-
-        $widget_id = $this->get_id();
 ?>
-        <div class="image-transition-loop-wrapper">
-            <div class="swiper image-transition-swiper" id="swiper-<?php echo esc_attr($widget_id); ?>">
+        <div class="image-transition-loop-wrapper" data-widget-id="<?php echo esc_attr($widget_id); ?>">
+            <div class="swiper image-transition-swiper" id="swiper-<?php echo esc_attr($widget_id); ?>"
+                data-autoplay_delay="<?php echo esc_attr($settings['autoplay_delay']); ?>"
+                data-transition_speed="<?php echo esc_attr($settings['transition_speed']); ?>"
+                data-effect="<?php echo esc_attr($settings['effect']); ?>">
                 <div class="swiper-wrapper">
                     <?php foreach ($images as $image) : ?>
                         <div class="swiper-slide">
@@ -194,126 +193,6 @@ class Image_Transition_Loop_Widget extends \Elementor\Widget_Base
                 </div>
             </div>
         </div>
-
-        <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-        <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script> -->
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                if (typeof Swiper !== 'undefined') {
-                    new Swiper('#swiper-<?php echo esc_js($widget_id); ?>', {
-                        effect: '<?php echo esc_js($settings['effect']); ?>',
-                        loop: true,
-                        autoplay: {
-                            delay: <?php echo intval($settings['autoplay_delay']); ?>,
-                            disableOnInteraction: false,
-                        },
-                        speed: <?php echo intval($settings['transition_speed']); ?>,
-                        <?php if ($settings['effect'] === 'cube') : ?>
-                            cubeEffect: {
-                                shadow: true,
-                                slideShadows: true,
-                                shadowOffset: 20,
-                                shadowScale: 0.94,
-                            },
-                        <?php elseif ($settings['effect'] === 'coverflow') : ?>
-                            coverflowEffect: {
-                                rotate: 50,
-                                stretch: 0,
-                                depth: 100,
-                                modifier: 1,
-                                slideShadows: true,
-                            },
-                        <?php endif; ?>
-                    });
-                }
-            });
-        </script>
-
-        <style>
-            .image-transition-loop-wrapper {
-                width: 100%;
-                height: 100%;
-            }
-
-            .image-transition-swiper {
-                width: 100%;
-                overflow: hidden;
-            }
-
-            .image-transition-swiper .swiper-slide {
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                background: #f0f0f0;
-            }
-
-            .image-transition-swiper .swiper-slide img {
-                display: block;
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-            }
-        </style>
-    <?php
-    }
-
-    protected function content_template()
-    {
-    ?>
-        <#
-            var images=settings.images;
-            var widgetId=Math.random().toString(36).substr(2, 9);
-
-            if ( images.length===0 ) {
-            return;
-            }
-            #>
-            <div class="image-transition-loop-wrapper">
-                <div class="swiper image-transition-swiper" id="swiper-{{{ widgetId }}}">
-                    <div class="swiper-wrapper">
-                        <# _.each( images, function( image ) { #>
-                            <div class="swiper-slide">
-                                <img src="{{{ image.url }}}" alt="" style="width: 100%; height: 100%; object-fit: cover;">
-                            </div>
-                            <# }); #>
-                    </div>
-                </div>
-            </div>
-
-            <style>
-                .image-transition-loop-wrapper {
-                    width: 100%;
-                }
-
-                .image-transition-swiper {
-                    width: 100%;
-                    overflow: hidden;
-
-                    height: {
-                            {
-                                {
-                                settings.height.size+settings.height.unit
-                            }
-                        }
-                    }
-
-                    ;
-                }
-
-                .image-transition-swiper .swiper-slide {
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    background: #f0f0f0;
-                }
-
-                .image-transition-swiper .swiper-slide img {
-                    display: block;
-                    width: 100%;
-                    height: 100%;
-                    object-fit: cover;
-                }
-            </style>
-    <?php
+<?php
     }
 }
