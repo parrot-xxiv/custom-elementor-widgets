@@ -1,0 +1,234 @@
+/**
+ * HTML Tag Widget Styles
+ * Styles for entrance animations and base widget styling
+ */
+
+/* Base widget styles */
+.html-tag-element {
+    display: block;
+    word-wrap: break-word;
+    hyphens: auto;
+}
+
+.html-tag-element a {
+    text-decoration: inherit;
+    color: inherit;
+    transition: opacity 0.3s ease;
+}
+
+.html-tag-element a:hover {
+    opacity: 0.8;
+}
+
+/* Animation base styles */
+.has-entrance-animation {
+    position: relative;
+    overflow: visible;
+}
+
+.has-entrance-animation.animation-started {
+    opacity: 1 !important;
+}
+
+/* Staggered Blur Fade Animation */
+.animation-staggered_blur_fade .letter {
+    display: inline-block;
+    transition: opacity 0.6s ease-out, 
+                filter 0.6s ease-out, 
+                transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    will-change: opacity, filter, transform;
+}
+
+.animation-staggered_blur_fade .letter-space {
+    display: inline-block;
+    opacity: 1;
+}
+
+/* Typewriter Animation */
+.animation-typewriter .typewriter-text {
+    display: inline;
+}
+
+.animation-typewriter .typewriter-cursor {
+    display: inline-block;
+    margin-left: 2px;
+    font-weight: 100;
+    animation: blink 500ms infinite;
+    will-change: opacity;
+}
+
+/* Cursor blink animation */
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+}
+
+/* Animation completion states */
+.animation-completed.animation-typewriter .typewriter-cursor {
+    animation: none;
+    opacity: 0;
+    transition: opacity 0.3s ease-out;
+}
+
+/* Performance optimizations */
+.has-entrance-animation * {
+    backface-visibility: hidden;
+    perspective: 1000px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .animation-staggered_blur_fade .letter {
+        transition-duration: 0.4s;
+    }
+    
+    .animation-typewriter .typewriter-cursor {
+        margin-left: 1px;
+    }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+    .has-entrance-animation,
+    .has-entrance-animation * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+    
+    .animation-staggered_blur_fade .letter {
+        opacity: 1 !important;
+        filter: none !important;
+        transform: none !important;
+    }
+    
+    .animation-typewriter .typewriter-cursor {
+        animation: none !important;
+        opacity: 0 !important;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .animation-staggered_blur_fade .letter {
+        filter: none !important;
+    }
+}
+
+/* Print styles */
+@media print {
+    .has-entrance-animation {
+        opacity: 1 !important;
+    }
+    
+    .animation-staggered_blur_fade .letter {
+        opacity: 1 !important;
+        filter: none !important;
+        transform: none !important;
+    }
+    
+    .typewriter-cursor {
+        display: none !important;
+    }
+}
+
+/* Loading state */
+.has-entrance-animation:not(.animation-started) {
+    opacity: 0;
+    transition: opacity 0.1s ease;
+}
+
+/* Smooth scrolling for animated elements */
+.has-entrance-animation {
+    scroll-margin-top: 100px;
+}
+
+/* Prevent layout shift during animation preparation */
+.animation-staggered_blur_fade {
+    min-height: 1em;
+    line-height: 1.2;
+}
+
+.animation-typewriter {
+    min-height: 1em;
+}
+
+/* Focus styles for accessibility */
+.html-tag-element:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+}
+
+.html-tag-element a:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+    text-decoration: underline;
+}
+
+/* RTL support */
+[dir="rtl"] .animation-typewriter .typewriter-cursor {
+    margin-left: 0;
+    margin-right: 2px;
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+    .animation-staggered_blur_fade .letter {
+        filter: blur(10px) brightness(0.9);
+    }
+}
+
+/* Animation timing adjustments for different element types */
+h1.has-entrance-animation .letter,
+h2.has-entrance-animation .letter {
+    transition-duration: 0.8s;
+}
+
+h3.has-entrance-animation .letter,
+h4.has-entrance-animation .letter {
+    transition-duration: 0.6s;
+}
+
+h5.has-entrance-animation .letter,
+h6.has-entrance-animation .letter,
+p.has-entrance-animation .letter {
+    transition-duration: 0.4s;
+}
+
+/* Prevent text selection during animation */
+.has-entrance-animation:not(.animation-completed) {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+/* Restore text selection after animation */
+.animation-completed {
+    user-select: text;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+}
+
+/* Hover effects for completed animations */
+.animation-completed.animation-staggered_blur_fade:hover .letter {
+    transform: translateY(-2px);
+    transition: transform 0.2s ease;
+}
+
+/* Loading skeleton for better UX */
+.has-entrance-animation.loading {
+    background: linear-gradient(90deg, 
+        transparent 25%, 
+        rgba(255,255,255,0.1) 50%, 
+        transparent 75%);
+    background-size: 200% 100%;
+    animation: loading-skeleton 1.5s infinite;
+}
+
+@keyframes loading-skeleton {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
