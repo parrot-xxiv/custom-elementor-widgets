@@ -62,6 +62,7 @@ class Plugin {
 
         wp_register_script('cew-gsap', "https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js", [], false, ['strategy' => 'defer']);
         wp_register_script('cew-scrolltrigger', "https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js", [], false, ['strategy' => 'defer']);
+        wp_register_script('cew-splittext', "https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js", [], false, ['strategy' => 'defer']);
         wp_register_script('cew-swiper', "https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js", [], false, ['strategy' => 'defer']);
         wp_register_script('cew-parallax', "https://cdnjs.cloudflare.com/ajax/libs/parallax/3.1.0/parallax.min.js", [], false, ['strategy' => 'defer']);
 
