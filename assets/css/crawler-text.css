@@ -1,0 +1,25 @@
+.crawler-wrapper {
+    overflow: hidden;
+    white-space: nowrap;
+    position: relative;
+    display: block;
+}
+
+.crawler-track {
+    display: inline-block;
+    white-space: nowrap;
+}
+
+.crawler-words-container {
+    display: inline-block;
+    margin-right: var(--spacing, 15px);
+}
+
+.crawler-word {
+    display: inline-block;
+}
+
+.outlined-text {
+    -webkit-text-stroke: 1px black;
+    color: transparent;
+}
