@@ -1,4 +1,7 @@
 <?php
+
+defined('ABSPATH') || exit;
+
 class Highlight_Word extends \Elementor\Widget_Base {
 
     public function get_name() {

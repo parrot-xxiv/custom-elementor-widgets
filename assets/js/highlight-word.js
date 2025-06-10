@@ -4,145 +4,220 @@
     $(document).ready(function () {
 
         function highlightWordWidget($scope, $) {
-            const $widget = $scope.find('.highlight-word-widget');
-            const $heading = $widget.find('.highlight-heading');
+            // Select all instances of the highlight word widget
+            const highlightWidgets = document.querySelectorAll('.highlight-word-widget');
 
-            if (!$widget.length || !$heading.length) return;
-
-            const highlightWord = $widget.data('highlight-word');
-            const highlightColor = $widget.data('highlight-color');
-            const strokeAngle = $widget.data('stroke-angle');
-            const brushStyle = $widget.data('brush-style');
-
-            if (!highlightWord) return;
-
-            const headingText = $heading.text();
-            const regex = new RegExp(`(${highlightWord})`, 'gi');
-            const highlightedHTML = headingText.replace(regex, `<span class="highlight-target">$1</span>`);
-
-            $heading.html(highlightedHTML);
-
-            const $highlightTarget = $heading.find('.highlight-target');
-
-            if ($highlightTarget.length) {
-                applyHighlightStyle($highlightTarget, highlightColor, strokeAngle, brushStyle);
-
-                // gsap.set($highlightTarget, { opacity: 0, scale: 0.8 });
-
-                ScrollTrigger.create({
-                    trigger: $widget[0],
-                    start: 'top 80%',
-                    once: true,
-                    onEnter: () => {
-                        $highlightTarget.addClass('animate-stroke');
-                    }
-                });
+            // If no widgets are found on the page, do nothing.
+            if (!highlightWidgets.length) {
+                return;
             }
-        }
 
-        function applyHighlightStyle($element, color, angle, style) {
-            const baseStyles = {
-                position: 'relative',
-                display: 'inline-block',
-                color: '#000'
+            /**
+             * Injects the necessary CSS styles into the document's head.
+             * This makes the script self-contained and avoids the need for a separate CSS file.
+             * It runs only once, even if there are multiple widgets on the page.
+             */
+            const injectStyles = () => {
+                // Check if styles have already been injected to prevent duplication
+                if (document.getElementById('cew-highlight-styles')) {
+                    return;
+                }
+
+                const style = document.createElement('style');
+                style.id = 'cew-highlight-styles';
+                style.innerHTML = `
+      .highlight-heading {
+        /* Ensure the heading doesn't have its own positioning that could conflict */
+        position: relative;
+        z-index: 1;
+      }
+      .highlight-heading .cew-highlight-word-wrapper {
+        position: relative;
+        display: inline-block;
+        white-space: nowrap; /* Prevents the word and its SVG from wrapping */
+      }
+      .cew-highlight-word-wrapper .cew-highlight-svg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        overflow: visible;
+        z-index: -1; /* Place SVG behind the text */
+        pointer-events: none; /* Make SVG non-interactive */
+      }
+      .cew-highlight-word-wrapper .cew-highlight-svg path {
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        fill: none;
+      }
+      /* Fallback for browsers that don't support inline SVG styles well */
+      .cew-highlight-word-wrapper {
+          -webkit-transform: translateZ(0);
+          transform: translateZ(0);
+      }
+    `;
+                document.head.appendChild(style);
             };
 
-            $element.css(baseStyles);
+            // Inject the base styles needed for the animations
+            injectStyles();
 
-            let pseudoStyles = '';
 
-            switch (style) {
-                case 'underline':
-                    pseudoStyles = `
-                        content: '';
-                        position: absolute;
-                        bottom: -2px;
-                        left: 0;
-                        width: 0%;
-                        height: 3px;
-                        background: ${color};
-                        transform: rotate(${angle});
-                        transform-origin: left center;
-                        transition: width 0.8s ease-out;
-                    `;
-                    break;
+            // Process each widget instance individually
+            highlightWidgets.forEach((widget, index) => {
+                const heading = widget.querySelector('.highlight-heading');
 
-                case 'highlight':
-                    pseudoStyles = `
-                        content: '';
-                        position: absolute;
-                        top: 45%;
-                        left: -2px;
-                        right: 100%;
-                        bottom: 0;
-                        background: ${color};
-                        transform: rotate(${angle});
-                        z-index: -1;
-                        opacity: 0.7;
-                        height: 50%;
-                        transition: right 0.8s ease-out;
-                        border-radius: 20px 4px 30px 5px;
-                    `;
-                    break;
+                if (!heading) {
+                    return;
+                }
 
-                case 'circle':
-                    pseudoStyles = `
-                        content: '';
-                        position: absolute;
-                        top: -5px;
-                        left: -5px;
-                        right: -5px;
-                        bottom: -5px;
-                        border: 2px solid ${color};
-                        border-radius: 50%;
-                        transform: rotate(${angle});
-                        stroke-dasharray: 1000;
-                        stroke-dashoffset: 1000;
-                        animation: drawCircle 0.8s ease-out forwards;
-                    `;
-                    break;
+                // --- 1. Read Data Attributes from the Widget ---
+                const highlightWord = widget.dataset.highlightWord?.toLowerCase() || '';
+                const highlightColor = widget.dataset.highlightColor || '#ffeb3b';
+                const strokeAngle = parseFloat(widget.dataset.strokeAngle) || -5;
+                const brushStyle = widget.dataset.brushStyle || 'underline';
 
-                case 'strikethrough':
-                    pseudoStyles = `
-                        content: '';
-                        position: absolute;
-                        top: 50%;
-                        left: 0;
-                        width: 0%;
-                        height: 2px;
-                        background: ${color};
-                        transform: translateY(-50%) rotate(${angle});
-                        transition: width 0.8s ease-out;
-                    `;
-                    break;
-            }
+                // --- 2. Split Text and Find the Target Word ---
+                const split = new SplitText(heading, { type: 'words' });
+                let targetWordEl = null;
 
-            const styleId = 'highlight-word-styles';
-            let $style = $(`#${styleId}`);
-
-            if (!$style.length) {
-                $style = $(`<style id="${styleId}"></style>`).appendTo('head');
-            }
-
-            const className = `highlight-${Date.now()}`;
-            $element.addClass(className);
-
-            const keyframes = `
-                @keyframes drawCircle {
-                    to {
-                        stroke-dashoffset: 0;
+                split.words.forEach(wordEl => {
+                    if (targetWordEl) return; // already found
+                    const cleanWord = wordEl.textContent.trim().replace(/[.,!?;:]/g, '');
+                    if (cleanWord.toLowerCase() === highlightWord) {
+                        targetWordEl = wordEl;
                     }
-                }
-            `;
+                });
 
-            $style.append(`
-                .${className}::after { ${pseudoStyles} }
-                ${keyframes}
-                .${className}.animate-stroke::after {
-                    ${style === 'underline' || style === 'strikethrough' ? 'width: 100% !important;' : ''}
-                    ${style === 'highlight' ? 'right: -2px !important;' : ''}
+                if (!targetWordEl) {
+                    split.revert();
+                    console.warn(`Highlight Word Widget: The word "${highlightWord}" was not found in the heading.`);
+                    return;
                 }
-            `);
+
+                // --- 3. Prepare the Word for Animation ---
+                const wrapper = document.createElement('span');
+                wrapper.classList.add('cew-highlight-word-wrapper');
+                targetWordEl.parentNode.insertBefore(wrapper, targetWordEl);
+                wrapper.appendChild(targetWordEl);
+
+
+                const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                svg.classList.add('cew-highlight-svg');
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+
+                // For the textured brush, we need to add a filter definition
+                if (brushStyle === 'highlight') {
+                    const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+                    const filter = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
+                    const filterId = `brush-texture-${index}`; // Unique ID for each widget instance
+                    filter.setAttribute('id', filterId);
+                    filter.setAttribute('x', '-20%');
+                    filter.setAttribute('y', '-20%');
+                    filter.setAttribute('width', '140%');
+                    filter.setAttribute('height', '140%');
+
+                    // Add turbulence for the brush texture
+                    const feTurbulence = document.createElementNS('http://www.w3.org/2000/svg', 'feTurbulence');
+                    feTurbulence.setAttribute('type', 'fractalNoise');
+                    feTurbulence.setAttribute('baseFrequency', '0.9 0.9'); // Controls the roughness
+                    feTurbulence.setAttribute('numOctaves', '2');
+                    feTurbulence.setAttribute('result', 'turbulence');
+
+                    // Use a displacement map to apply the texture to the stroke
+                    const feDisplacementMap = document.createElementNS('http://www.w3.org/2000/svg', 'feDisplacementMap');
+                    feDisplacementMap.setAttribute('in', 'SourceGraphic');
+                    feDisplacementMap.setAttribute('in2', 'turbulence');
+                    feDisplacementMap.setAttribute('scale', '5'); // Controls the intensity of the effect
+                    feDisplacementMap.setAttribute('xChannelSelector', 'R');
+                    feDisplacementMap.setAttribute('yChannelSelector', 'G');
+
+                    filter.appendChild(feTurbulence);
+                    filter.appendChild(feDisplacementMap);
+                    defs.appendChild(filter);
+                    svg.appendChild(defs);
+
+                    // Apply the filter to the path
+                    path.setAttribute('filter', `url(#${filterId})`);
+                }
+
+                svg.appendChild(path);
+                wrapper.appendChild(svg);
+
+
+                // Use a timeout to ensure the DOM has updated and dimensions are available
+                setTimeout(() => {
+                    const w = wrapper.offsetWidth;
+                    const h = wrapper.offsetHeight;
+                    let pathData = '';
+                    let strokeWidth = Math.max(2, h / 8);
+                    let animationEase = 'power3.inOut';
+
+                    // --- 4. Define SVG Paths and Animation Properties for Brush Styles ---
+                    switch (brushStyle) {
+                        case 'circle':
+                            // An open, hand-drawn circle path for soft, rounded ends.
+                            strokeWidth = Math.max(2, h / 15);
+                            pathData = `M${w * 0.5}, ${h * 0.95} C ${-w * 0.1},${h * 1.2} ${-w * 0.1},${-h * 0.2} ${w * 0.5},${h * 0.1} C ${w * 1.1},${-h * 0.2} ${w * 1.2},${h * 1.2} ${w * 0.55},${h * 0.9}`;
+                            // This ease overshoots the end value, creating the "extend the ends" effect.
+                            animationEase = 'back.out(1.2)';
+                            break;
+
+                        case 'highlight':
+                            // A thick, wavy, organic path that mimics a real brush stroke.
+                            strokeWidth = h * 0.7; // Thick like a highlighter
+                            pathData = `M${w * 0.1},${h * 0.6} Q${w * 0.15},${h * 0.4} ${w * 0.5},${h * 0.6} T${w * 0.9},${h * 0.55}`;
+                            path.style.strokeOpacity = '0.75';
+                            break;
+
+                        case 'strikethrough':
+                            strokeWidth = Math.max(2, h / 10);
+                            pathData = `M0,${h * 0.5} L${w},${h * 0.5}`;
+                            break;
+
+                        case 'underline':
+                        default:
+                            strokeWidth = Math.max(2, h / 10);
+                            pathData = `M0,${h * 0.9} L${w},${h * 0.9}`;
+                            break;
+                    }
+
+                    // --- 5. Apply Path and Styles ---
+                    path.setAttribute('d', pathData);
+                    path.setAttribute('stroke', highlightColor);
+                    path.setAttribute('stroke-width', strokeWidth);
+
+                    const pathLength = path.getTotalLength();
+                    path.style.strokeDasharray = pathLength;
+                    path.style.strokeDashoffset = pathLength;
+
+                    gsap.set(svg, {
+                        rotate: strokeAngle,
+                        xPercent: -50,
+                        yPercent: -50,
+                        left: '50%',
+                        top: '50%'
+                    });
+
+                    // --- 6. Create GSAP Scroll-Triggered Animation ---
+                    const tl = gsap.timeline({
+                        scrollTrigger: {
+                            trigger: widget,
+                            start: 'top 85%',
+                            end: 'bottom top',
+                            toggleActions: 'play none none none',
+                        }
+                    });
+
+                    tl.to(path, {
+                        strokeDashoffset: 0,
+                        duration: 1.5,
+                        ease: animationEase
+                    });
+
+                }, 100);
+            });
         }
 
         elementorFrontend.hooks.addAction('frontend/element_ready/highlight_word.default', highlightWordWidget);
