@@ -65,6 +65,7 @@ class Plugin {
         wp_register_script('cew-splittext', "https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js", [], false, ['strategy' => 'defer']);
         wp_register_script('cew-swiper', "https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js", [], false, ['strategy' => 'defer']);
         wp_register_script('cew-parallax', "https://cdnjs.cloudflare.com/ajax/libs/parallax/3.1.0/parallax.min.js", [], false, ['strategy' => 'defer']);
+        wp_register_script('cew-lucide', "https://unpkg.com/lucide@latest/dist/umd/lucide.js", [], false, ['strategy' => 'defer']);
 
         $dependencies = [
             // 'image-transition-loop.js' => ['cew-swiper'],

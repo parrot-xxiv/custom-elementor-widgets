@@ -6,31 +6,42 @@
 
 defined('ABSPATH') || exit;
 
-class HTML_Tag extends \Elementor\Widget_Base
-{
-
-    public function get_name()
-    {
-        return 'html_tag_widget';
-    }
-
-    public function get_title()
-    {
-        return __('HTML Tag', 'custom-elementor-widgets');
-    }
-
-    public function get_icon()
-    {
-        return 'eicon-heading';
-    }
-
-    public function get_categories()
-    {
+class HTML_Tag extends \Elementor\Widget_Base {
+    public function get_categories() {
         return ['basic'];
     }
 
-    protected function register_controls()
-    {
+    public function get_icon() {
+        return 'eicon-heading';
+    }
+
+    public function get_name() {
+        return 'html_tag_widget';
+    }
+
+    public function get_script_depends() {
+        return ['cew-html-tag', 'cew-gsap', 'cew-scrolltrigger','cew-splittext']; // fix this: return [] if selected "none"
+    }
+
+    public function get_style_depends() {
+        return ['cew-html-tag'];
+    }
+
+    public function get_title() {
+        return __('HTML Tag', 'custom-elementor-widgets');
+    }
+
+    protected function content_template() {
+        ?>
+        <# var tag=settings.html_tag || 'h2' ; var link=settings.link.url ? '<a href="' + settings.link.url + '"' : '' ; if
+            (settings.link.is_external) { link +=' target="_blank"' ; } if (settings.link.nofollow) { link +=' rel="nofollow"' ;
+            } link +='>' + settings.text + '</a>' ; var output=settings.link.url ? link : settings.text; #>
+            <{{{ tag }}} class="html-tag-element">{{{ output }}}</{{{ tag }}}>
+        <?php
+
+    }
+
+    protected function register_controls() {
         // Content Section
         $this->start_controls_section(
             'content_section',
@@ -67,6 +78,9 @@ class HTML_Tag extends \Elementor\Widget_Base
                 'type' => \Elementor\Controls_Manager::TEXTAREA,
                 'default' => __('Your text here', 'custom-elementor-widgets'),
                 'placeholder' => __('Enter your text', 'custom-elementor-widgets'),
+                'dynamic' => [
+                    'active' => true,
+                ],
             ]
         );
 
@@ -81,6 +95,9 @@ class HTML_Tag extends \Elementor\Widget_Base
                     'url' => '',
                     'is_external' => true,
                     'nofollow' => true,
+                ],
+                'dynamic' => [
+                    'active' => true,
                 ],
             ]
         );
@@ -136,6 +153,22 @@ class HTML_Tag extends \Elementor\Widget_Base
                     'none' => __('None', 'custom-elementor-widgets'),
                     'staggered_blur_fade' => __('Staggered Blur & Fade-In Letters', 'custom-elementor-widgets'),
                     'typewriter' => __('Typewriter Effect with Blinking Cursor', 'custom-elementor-widgets'),
+                ],
+            ]
+        );
+
+        $this->add_control(
+            'split_type',
+            [
+                'label' => __('Animation Type', 'custom-elementor-widgets'),
+                'type' => \Elementor\Controls_Manager::SELECT,
+                'default' => 'chars',
+                'options' => [
+                    'chars' => __('Letters', 'custom-elementor-widgets'),
+                    'words' => __('Words', 'custom-elementor-widgets'),
+                ],
+                'condition' => [
+                    'entrance_animation' => 'staggered_blur_fade',
                 ],
             ]
         );
@@ -245,6 +278,22 @@ class HTML_Tag extends \Elementor\Widget_Base
             ]
         );
 
+        $this->add_control(
+            'animation_trigger',
+            [
+                'label' => __('Animation Trigger', 'custom-elementor-widgets'),
+                'type' => \Elementor\Controls_Manager::SELECT,
+                'default' => 'viewport',
+                'options' => [
+                    'viewport' => __('When in Viewport', 'custom-elementor-widgets'),
+                    'page_load' => __('On Page Load', 'custom-elementor-widgets'),
+                ],
+                'condition' => [
+                    'entrance_animation!' => 'none',
+                ],
+            ]
+        );
+
         $this->end_controls_section();
 
         // Style Section
@@ -277,6 +326,20 @@ class HTML_Tag extends \Elementor\Widget_Base
             ]
         );
 
+        $this->add_control(
+            'text_hover_color',
+            [
+                'label' => __('Link Hover Color', 'custom-elementor-widgets'),
+                'type' => \Elementor\Controls_Manager::COLOR,
+                'selectors' => [
+                    '{{WRAPPER}} .html-tag-element a:hover' => 'color: {{VALUE}};',
+                ],
+                'condition' => [
+                    'link[url]!' => '',
+                ],
+            ]
+        );
+
         $this->add_group_control(
             \Elementor\Group_Control_Text_Shadow::get_type(),
             [
@@ -291,7 +354,7 @@ class HTML_Tag extends \Elementor\Widget_Base
             [
                 'label' => __('Margin', 'custom-elementor-widgets'),
                 'type' => \Elementor\Controls_Manager::DIMENSIONS,
-                'size_units' => ['px', '%', 'em'],
+                'size_units' => ['px', '%', 'em', 'rem'],
                 'selectors' => [
                     '{{WRAPPER}} .html-tag-element' => 'margin: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
                 ],
@@ -303,7 +366,7 @@ class HTML_Tag extends \Elementor\Widget_Base
             [
                 'label' => __('Padding', 'custom-elementor-widgets'),
                 'type' => \Elementor\Controls_Manager::DIMENSIONS,
-                'size_units' => ['px', '%', 'em'],
+                'size_units' => ['px', '%', 'em', 'rem'],
                 'selectors' => [
                     '{{WRAPPER}} .html-tag-element' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
                 ],
@@ -313,62 +376,73 @@ class HTML_Tag extends \Elementor\Widget_Base
         $this->end_controls_section();
     }
 
-    protected function render()
-    {
+    protected function render() {
         $settings = $this->get_settings_for_display();
         $tag = $settings['html_tag'];
         $text = $settings['text'];
         $animation = $settings['entrance_animation'];
+        $split_type = $settings['split_type'];
+
+        // Validation
+        if (empty($text)) {
+            if (\Elementor\Plugin::$instance->editor->is_edit_mode()) {
+                echo '<div class="elementor-alert elementor-alert-warning">' .
+                __('Please enter some text content.', 'custom-elementor-widgets') .
+                    '</div>';
+            }
+            return;
+        }
 
         $this->add_render_attribute('html_tag', 'class', 'html-tag-element');
 
-        // Add animation classes and data attributes
+        // Animation classes and data attributes
         if ($animation !== 'none') {
-            $this->add_render_attribute('html_tag', 'class', 'has-entrance-animation');
-            $this->add_render_attribute('html_tag', 'class', 'animation-' . $animation);
             $this->add_render_attribute('html_tag', 'data-animation', $animation);
 
-            // Safe array access with fallback values
-            $duration = isset($settings['animation_duration']['size']) ? $settings['animation_duration']['size'] : 2000;
-            $delay = isset($settings['animation_delay']['size']) ? $settings['animation_delay']['size'] : 0;
+            if (!empty($settings['animation_duration']['size'])) {
+                $this->add_render_attribute('html_tag', 'data-duration', $settings['animation_duration']['size']);
+            }
 
-            $this->add_render_attribute('html_tag', 'data-duration', $duration);
-            $this->add_render_attribute('html_tag', 'data-delay', $delay);
+            if (!empty($settings['animation_delay']['size'])) {
+                $this->add_render_attribute('html_tag', 'data-delay', $settings['animation_delay']['size']);
+            }
 
-            if ($animation === 'staggered_blur_fade') {
-                $stagger_delay = isset($settings['stagger_delay']['size']) ? $settings['stagger_delay']['size'] : 50;
-                $this->add_render_attribute('html_tag', 'data-stagger-delay', $stagger_delay);
+            if ($animation === 'staggered_blur_fade' && !empty($settings['stagger_delay']['size'])) {
+                $this->add_render_attribute('html_tag', 'data-stagger', $settings['stagger_delay']['size']);
+                $this->add_render_attribute('html_tag', 'data-split', $split_type);
             }
 
             if ($animation === 'typewriter') {
-                $typing_speed = isset($settings['typewriter_speed']['size']) ? $settings['typewriter_speed']['size'] : 100;
-                $cursor_blink = isset($settings['cursor_blink_speed']['size']) ? $settings['cursor_blink_speed']['size'] : 500;
-                $this->add_render_attribute('html_tag', 'data-typing-speed', $typing_speed);
-                $this->add_render_attribute('html_tag', 'data-cursor-blink', $cursor_blink);
+                if (!empty($settings['typewriter_speed']['size'])) {
+                    $this->add_render_attribute('html_tag', 'data-speed', $settings['typewriter_speed']['size']);
+                }
+                if (!empty($settings['cursor_blink_speed']['size'])) {
+                    $this->add_render_attribute('html_tag', 'data-blink', $settings['cursor_blink_speed']['size']);
+                }
+            }
+
+            if (!empty($settings['animation_trigger'])) {
+                $this->add_render_attribute('html_tag', 'data-trigger', $settings['animation_trigger']);
             }
         }
 
-        // Render the element
-        if (! empty($settings['link']['url'])) {
-            $this->add_link_attributes('link', $settings['link']);
-            echo '<' . esc_attr($tag) . ' ' . $this->get_render_attribute_string('html_tag') . '>';
-            echo '<a ' . $this->get_render_attribute_string('link') . '>' . esc_html($text) . '</a>';
-            echo '</' . esc_attr($tag) . '>';
-        } else {
-            echo '<' . esc_attr($tag) . ' ' . $this->get_render_attribute_string('html_tag') . '>';
-            echo esc_html($text);
-            echo '</' . esc_attr($tag) . '>';
+        $output_text = $text;
+
+        // Optional link
+        if (!empty($settings['link']['url'])) {
+            $this->add_render_attribute('link', 'href', $settings['link']['url']);
+
+            if (!empty($settings['link']['is_external'])) {
+                $this->add_render_attribute('link', 'target', '_blank');
+            }
+
+            if (!empty($settings['link']['nofollow'])) {
+                $this->add_render_attribute('link', 'rel', 'nofollow');
+            }
+
+            $output_text = sprintf('<a %s>%s</a>', $this->get_render_attribute_string('link'), $text);
         }
 
-    }
-
-    public function get_style_depends()
-    {
-        return ['cew-html-tag'];
-    }
-
-    public function get_script_depends()
-    {
-        return ['cew-html-tag'];  // fix this: return [] if selected "none"
+        printf('<%1$s %2$s>%3$s</%1$s>', esc_html($tag), $this->get_render_attribute_string('html_tag'), $output_text);
     }
 }
